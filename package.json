@@ -1,0 +1,24 @@
+{
+  "name": "performance-monitor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build":"rm -rf dist && tsc --outDir dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hq229075284/performance-monitor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hq229075284/performance-monitor/issues"
+  },
+  "homepage": "https://github.com/hq229075284/performance-monitor#readme",
+  "dependencies": {
+    "typescript": "^4.3.2"
+  }
+}
