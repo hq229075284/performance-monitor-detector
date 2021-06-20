@@ -1,9 +1,13 @@
 import communication from "./Communication";
 import { UV_KEY } from "./constant";
-
-class UV {
-  setUser(userInfo: any) {
-    this.tryReport(userInfo);
+import User from "./User";
+class UV extends User {
+  constructor() {
+    super();
+    super.subscribe(this.onUserInfoChange);
+  }
+  onUserInfoChange() {
+    this.tryReport(this.userInfo);
   }
   getPrevLoginTime() {
     return new Promise<number>((resolve) => {});

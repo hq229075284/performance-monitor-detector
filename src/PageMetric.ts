@@ -1,6 +1,6 @@
 import communication from "./Communication";
 import { ENTRY_KEY, PAGE_STAY_TIME_KEY, SOURCE_LOADED_KEY } from "./constant";
-
+import User from "./User";
 // interface extractFnType {
 //   <TSource, TKey extends keyof TSource>(source: TSource, extractKeys: TKey[]): Pick<TSource, TKey>;
 // }
@@ -11,10 +11,11 @@ function extract<TSource, TKey extends keyof TSource>(source: TSource, extractKe
   }, {} as Pick<TSource, TKey>);
 }
 
-class PageMetric {
+class PageMetric extends User {
   startTime: number = 0;
   endTime: number = 0;
   constructor() {
+    super();
     this.getStartTime();
     this.listenEndTime();
 
