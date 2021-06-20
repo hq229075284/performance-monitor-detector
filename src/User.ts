@@ -9,6 +9,7 @@ class User {
   }
   setUser(userInfo: any) {
     this.userInfo = userInfo;
+    User.listeners.forEach((fn) => fn());
   }
   subscribe(fn: Function) {
     User.listeners.push(fn);
