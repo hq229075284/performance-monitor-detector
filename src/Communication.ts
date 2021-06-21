@@ -16,6 +16,10 @@ if (/(windows) nt (\d+)/i.test(navigatorInfo.userAgent)) {
   device = RegExp.$1;
   version = `${RegExp.$2}`;
 }
+if (/(mac os x) (\d+_\d+_\d+)/i.test(navigatorInfo.userAgent)) {
+  device = RegExp.$1;
+  version = `${RegExp.$2.replace("-", ".")}`;
+}
 const clientInfo = { ...navigatorInfo, device, version };
 
 class Communication extends User {

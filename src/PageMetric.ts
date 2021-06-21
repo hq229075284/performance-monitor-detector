@@ -60,6 +60,10 @@ class PageMetric extends User {
     window.addEventListener(
       "load",
       () => {
+        if (!window.performance.getEntriesByType) {
+          console.log("不支持`getEntriesByType`api");
+          return;
+        }
         const staticSourceList = window.performance.getEntriesByType("source") as PerformanceResourceTiming[];
         type keyEnum = "initiatorType" | "duration" | "name";
         const staticSourceMap = new Map<
@@ -119,6 +123,10 @@ class PageMetric extends User {
       document.addEventListener("DOMContentLoaded", loop);
     }); */
     function onDOMContentLoaded() {
+      if (!window.performance.getEntriesByType) {
+        console.log("不支持`getEntriesByType`api");
+        return;
+      }
       const { domComplete, fetchStart } = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
       console.log(window.performance.getEntriesByType("navigation")[0]);
       communication.sendMessage(FIRST_INTERACTIVE_KEY, domComplete - fetchStart);
@@ -130,6 +138,10 @@ class PageMetric extends User {
   // 第一次页面渲染的时间
   private firstPaintTime() {
     function onDOMContentLoaded() {
+      if (!window.performance.getEntriesByType) {
+        console.log("不支持`getEntriesByType`api");
+        return;
+      }
       const { domContentLoadedEventEnd, fetchStart } = window.performance.getEntriesByType(
         "navigation"
       )[0] as PerformanceNavigationTiming;
