@@ -1,15 +1,11 @@
 import communication from "./Communication";
-import { ENTRY_KEY, PAGE_STAY_TIME_KEY, SOURCE_LOADED_KEY } from "./constant";
+import { ENTRY_KEY, FIRST_INTERACTIVE_KEY, FIRST_PAINT_KEY, PAGE_STAY_TIME_KEY, SOURCE_LOADED_KEY } from "./constant";
 import User from "./User";
+import { extract } from "./tool";
+
 // interface extractFnType {
 //   <TSource, TKey extends keyof TSource>(source: TSource, extractKeys: TKey[]): Pick<TSource, TKey>;
 // }
-function extract<TSource, TKey extends keyof TSource>(source: TSource, extractKeys: TKey[]) {
-  return extractKeys.reduce((prev, key) => {
-    prev[key] = source[key];
-    return prev;
-  }, {} as Pick<TSource, TKey>);
-}
 
 class PageMetric extends User {
   startTime: number = 0;
@@ -22,6 +18,10 @@ class PageMetric extends User {
     this.getEntry();
 
     this.getStaticSourceLoadingTime();
+
+    this.firstInteractiveTime();
+
+    this.firstPaintTime();
   }
 
   // 页面停留时间
@@ -57,24 +57,86 @@ class PageMetric extends User {
 
   // 静态资源加载数据
   private getStaticSourceLoadingTime() {
-    window.addEventListener("load", () => {
-      const staticSourceList = window.performance.getEntriesByType("source") as PerformanceResourceTiming[];
-      type keyEnum = "initiatorType" | "duration" | "name";
-      const staticSourceMap = new Map<
-        string,
-        Pick<PerformanceResourceTiming, keyEnum>[] /* ReturnType中不能给泛型指定参数类型的值，所以直接定义最终要存储的值的类型 */
-      >();
-      staticSourceList.forEach((staticSourceTiming) => {
-        if (!staticSourceMap.has(staticSourceTiming.initiatorType)) {
-          staticSourceMap.set(staticSourceTiming.initiatorType, []);
-        }
-        const sourceInfos = staticSourceMap.get(staticSourceTiming.initiatorType)!;
-        sourceInfos.push(extract(staticSourceTiming, ["initiatorType", "duration", "name"]));
-        staticSourceMap.set(staticSourceTiming.initiatorType, sourceInfos);
-      });
+    window.addEventListener(
+      "load",
+      () => {
+        const staticSourceList = window.performance.getEntriesByType("source") as PerformanceResourceTiming[];
+        type keyEnum = "initiatorType" | "duration" | "name";
+        const staticSourceMap = new Map<
+          string,
+          Pick<PerformanceResourceTiming, keyEnum>[] /* ReturnType中不能给泛型指定参数类型的值，所以直接定义最终要存储的值的类型 */
+        >();
+        staticSourceList.forEach((staticSourceTiming) => {
+          if (!staticSourceMap.has(staticSourceTiming.initiatorType)) {
+            staticSourceMap.set(staticSourceTiming.initiatorType, []);
+          }
+          const sourceInfos = staticSourceMap.get(staticSourceTiming.initiatorType)!;
+          sourceInfos.push(extract(staticSourceTiming, ["initiatorType", "duration", "name"]));
+          staticSourceMap.set(staticSourceTiming.initiatorType, sourceInfos);
+        });
 
-      communication.sendMessage(SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
-    });
+        communication.sendMessage(SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
+      },
+      { once: true }
+    );
+  }
+
+  // 页面第一次可交互时间
+  private firstInteractiveTime() {
+    /* const p = new Promise<void>((resolve) => {
+      let timer: number;
+      let sign = {
+        timestamp: 0,
+      };
+      let onClick: any;
+      function getClickHandler(startTime: number) {
+        return function () {
+          const isNewest = sign.timestamp === startTime;
+          if (isNewest && Date.now() - startTime <= 50) {
+            clearTimeout(timer);
+            document.documentElement.removeEventListener("click", onClick);
+            window.removeEventListener("DOMContentLoaded", loop);
+            console.log("可交互");
+            resolve();
+          }
+        };
+      }
+      function simularClick(timestamp: number) {
+        sign.timestamp = timestamp;
+        document.documentElement.click();
+      }
+      function loop() {
+        let now = Date.now();
+        onClick = getClickHandler(now);
+        document.documentElement.addEventListener("click", onClick);
+        simularClick(now);
+
+        timer = window.setTimeout(() => {
+          document.documentElement.removeEventListener("click", onClick);
+          loop();
+        }, 50);
+      }
+      document.addEventListener("DOMContentLoaded", loop);
+    }); */
+    function onDOMContentLoaded() {
+      const { domComplete, fetchStart } = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+      console.log(window.performance.getEntriesByType("navigation")[0]);
+      communication.sendMessage(FIRST_INTERACTIVE_KEY, domComplete - fetchStart);
+      window.removeEventListener("DOMContentLoaded", onDOMContentLoaded);
+    }
+    window.addEventListener("DOMContentLoaded", onDOMContentLoaded, { once: true });
+  }
+
+  // 第一次页面渲染的时间
+  private firstPaintTime() {
+    function onDOMContentLoaded() {
+      const { domContentLoadedEventEnd, fetchStart } = window.performance.getEntriesByType(
+        "navigation"
+      )[0] as PerformanceNavigationTiming;
+      communication.sendMessage(FIRST_PAINT_KEY, domContentLoadedEventEnd - fetchStart);
+      window.removeEventListener("DOMContentLoaded", onDOMContentLoaded);
+    }
+    window.addEventListener("DOMContentLoaded", onDOMContentLoaded, { once: true });
   }
 }
 
