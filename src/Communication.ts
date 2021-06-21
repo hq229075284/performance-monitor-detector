@@ -22,7 +22,7 @@ class Communication extends User {
   sendMessage(key: string, payload: any) {
     return new Promise<void>((resolve) => {
       const img = new Image();
-      img.src = "http://192.168.2.130:9004?" + JSON.stringify({ key, clientInfo, payload });
+      img.src = "http://192.168.2.130:9004?" + JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo });
       img.onload = function () {
         console.log("monitor data send success");
         resolve();
