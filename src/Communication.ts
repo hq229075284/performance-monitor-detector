@@ -6,7 +6,7 @@ let device;
 let version;
 if (/(iphone|ipad|ipod).*? os (\d+_\d+_\d+)/i.test(navigatorInfo.userAgent)) {
   device = RegExp.$1;
-  version = `${RegExp.$2.replace("_", ".")}`;
+  version = `${RegExp.$2.replaceAll("_", ".")}`;
 }
 if (/(android) (\d+)/i.test(navigatorInfo.userAgent)) {
   device = RegExp.$1;
@@ -18,7 +18,7 @@ if (/(windows) nt (\d+)/i.test(navigatorInfo.userAgent)) {
 }
 if (/(mac os x) (\d+_\d+_\d+)/i.test(navigatorInfo.userAgent)) {
   device = RegExp.$1;
-  version = `${RegExp.$2.replace("_", ".")}`;
+  version = `${RegExp.$2.replaceAll("_", ".")}`;
 }
 const clientInfo = { ...navigatorInfo, device, version };
 
