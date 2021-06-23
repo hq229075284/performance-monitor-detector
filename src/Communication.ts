@@ -18,7 +18,7 @@ if (/(windows) nt (\d+)/i.test(navigatorInfo.userAgent)) {
 }
 if (/(mac os x) (\d+_\d+_\d+)/i.test(navigatorInfo.userAgent)) {
   device = RegExp.$1;
-  version = `${RegExp.$2.replace("-", ".")}`;
+  version = `${RegExp.$2.replace("_", ".")}`;
 }
 const clientInfo = { ...navigatorInfo, device, version };
 
@@ -26,7 +26,8 @@ class Communication extends User {
   sendMessage(key: string, payload: any) {
     return new Promise<void>((resolve) => {
       const img = new Image();
-      img.src = "http://192.168.2.130:9004?" + JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo });
+      img.src =
+        "http://127.0.0.1:3000/message?" + encodeURIComponent(JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo }));
       img.onload = function () {
         console.log("monitor data send success");
         resolve();
