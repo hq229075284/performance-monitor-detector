@@ -128,7 +128,6 @@ class PageMetric extends User {
         return;
       }
       const { domComplete, fetchStart } = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-      console.log(window.performance.getEntriesByType("navigation")[0]);
       communication.sendMessage(FIRST_INTERACTIVE_KEY, domComplete - fetchStart);
       window.removeEventListener("DOMContentLoaded", onDOMContentLoaded);
     }
