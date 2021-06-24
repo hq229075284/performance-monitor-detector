@@ -4,7 +4,7 @@ import User from "./User";
 class UV extends User {
   constructor() {
     super();
-    super.subscribe(this.onUserInfoChange);
+    super.subscribe(this.onUserInfoChange.bind(this));
   }
   onUserInfoChange() {
     this.tryReport(this.userInfo);
@@ -20,12 +20,12 @@ class UV extends User {
     return `${year}/${month}/${day}`;
   }
   protected async tryReport(userInfo: any) {
-    const now = Date.now();
-    const prevTime = await this.getPrevLoginTime();
-    if (this.getDate(now) === this.getDate(prevTime)) {
-      return;
-    }
-    communication.sendMessage(UV_KEY, { timestamp: now, userInfo });
+    // const now = Date.now();
+    // const prevTime = await this.getPrevLoginTime();
+    // if (this.getDate(now) === this.getDate(prevTime)) {
+    //   return;
+    // }
+    communication.sendMessage(UV_KEY, { url: window.location.href, userInfo });
   }
 }
 

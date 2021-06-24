@@ -9,3 +9,6 @@ export default {
   uv,
   pageMetric,
 };
+
+// UV采集测试用例
+uv.setUser({ username: "hanq" });
