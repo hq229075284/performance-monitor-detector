@@ -11,4 +11,4 @@ export default {
 };
 
 // UV采集测试用例
-uv.setUser({ username: "hanq" });
+uv.setUser({ usercode: 1, username: "hanq" });

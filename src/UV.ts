@@ -25,7 +25,7 @@ class UV extends User {
     // if (this.getDate(now) === this.getDate(prevTime)) {
     //   return;
     // }
-    communication.sendMessage(UV_KEY, { url: window.location.href, userInfo });
+    communication.sendMessage(UV_KEY, { url: window.location.href });
   }
 }
 

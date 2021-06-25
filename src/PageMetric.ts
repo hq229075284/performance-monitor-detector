@@ -51,7 +51,7 @@ class PageMetric extends User {
     const matched = window.location.href.match(/entryUrl=([^&]+)/i);
     if (matched && matched[1]) {
       const entryUrl = matched[1];
-      communication.sendMessage(ENTRY_KEY, entryUrl);
+      communication.sendMessage(ENTRY_KEY, { url: window.location.href, entryUrl });
     }
   }
 
