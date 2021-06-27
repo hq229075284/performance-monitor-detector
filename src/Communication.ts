@@ -27,7 +27,8 @@ class Communication extends User {
     return new Promise<void>((resolve) => {
       const img = new Image();
       img.src =
-        "http://127.0.0.1:3000/message?" + encodeURIComponent(JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo }));
+        "http://127.0.0.1:3000/message?" +
+        encodeURIComponent(JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo, url: window.location.href }));
       img.onload = function () {
         console.log("monitor data send success");
         resolve();

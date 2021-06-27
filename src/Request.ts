@@ -3,7 +3,7 @@ import { AJAX_KEY } from "./constant";
 
 interface IRecord {
   url: string;
-  params: any;
+  body: any;
   startTime: number;
   endTime: number;
   duration: number;
@@ -18,12 +18,12 @@ class NewXHR extends XMLHttpRequest {
   send(body: Parameters<XMLHttpRequest["send"]>[0]) {
     super.send(body);
     const url = this.responseURL;
-    const params = body instanceof Blob ? "blob" : body;
+    body = body instanceof Blob ? "blob" : body;
     const now = Date.now();
     const record: IRecord = {
-      //   id: url + "|" + JSON.stringify(params) + "|" + now,
+      //   id: url + "|" + JSON.stringify(body) + "|" + now,
       url,
-      params,
+      body,
       startTime: now,
     } as IRecord;
 
@@ -32,7 +32,7 @@ class NewXHR extends XMLHttpRequest {
       record.duration = record.endTime - record.startTime;
       communication.sendMessage(AJAX_KEY, record);
     };
-    this.addEventListener("load", onLoad);
+    this.addEventListener("load", onLoad, { once: true });
   }
 }
 
@@ -44,7 +44,7 @@ if (typeof window.fetch === "function") {
   function newFetch(...rest: Parameters<typeof _fetch>) {
     const record: IRecord = {
       url: typeof rest[0] === "string" ? rest[0] : rest[0].url,
-      params: rest[1]?.body,
+      body: rest[1]?.body,
       startTime: Date.now(),
     } as IRecord;
     return _fetch(...rest).then((res) => {

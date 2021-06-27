@@ -1,5 +1,5 @@
 import communication from "./Communication";
-import { ENTRY_KEY, FIRST_INTERACTIVE_KEY, FIRST_PAINT_KEY, PAGE_STAY_TIME_KEY, SOURCE_LOADED_KEY } from "./constant";
+import { ENTRY_KEY, FIRST_INTERACTIVE_KEY, FIRST_PAINT_KEY, PAGE_STAY_TIME_KEY, STATIC_SOURCE_LOADED_KEY } from "./constant";
 import User from "./User";
 import { extract } from "./tool";
 
@@ -17,11 +17,11 @@ class PageMetric extends User {
 
     this.getEntry();
 
-    this.getStaticSourceLoadingTime();
+    this.firstPaintTime();
 
     this.firstInteractiveTime();
 
-    this.firstPaintTime();
+    this.getStaticSourceLoadingTime();
   }
 
   // 页面停留时间
@@ -79,7 +79,7 @@ class PageMetric extends User {
           staticSourceMap.set(staticSourceTiming.initiatorType, sourceInfos);
         });
 
-        communication.sendMessage(SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
+        communication.sendMessage(STATIC_SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
       },
       { once: true }
     );
@@ -122,21 +122,20 @@ class PageMetric extends User {
       }
       document.addEventListener("DOMContentLoaded", loop);
     }); */
-    function onDOMContentLoaded() {
+    function onPageShow() {
       if (!window.performance.getEntriesByType) {
         console.log("不支持`getEntriesByType`api");
         return;
       }
       const { domComplete, fetchStart } = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
       communication.sendMessage(FIRST_INTERACTIVE_KEY, domComplete - fetchStart);
-      window.removeEventListener("DOMContentLoaded", onDOMContentLoaded);
     }
-    window.addEventListener("DOMContentLoaded", onDOMContentLoaded, { once: true });
+    window.addEventListener("pageshow", onPageShow, { once: true });
   }
 
   // 第一次页面渲染的时间
   private firstPaintTime() {
-    function onDOMContentLoaded() {
+    function onPageShow() {
       if (!window.performance.getEntriesByType) {
         console.log("不支持`getEntriesByType`api");
         return;
@@ -145,9 +144,8 @@ class PageMetric extends User {
         "navigation"
       )[0] as PerformanceNavigationTiming;
       communication.sendMessage(FIRST_PAINT_KEY, domContentLoadedEventEnd - fetchStart);
-      window.removeEventListener("DOMContentLoaded", onDOMContentLoaded);
     }
-    window.addEventListener("DOMContentLoaded", onDOMContentLoaded, { once: true });
+    window.addEventListener("pageshow", onPageShow, { once: true });
   }
 }
 
