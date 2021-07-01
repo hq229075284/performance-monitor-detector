@@ -34,7 +34,7 @@ class PageMetric extends User {
   private listenEndTime() {
     window.addEventListener("beforeunload", () => {
       this.endTime = Date.now();
-      communication.sendMessage(PAGE_STAY_TIME_KEY, this.endTime - this.startTime);
+      communication.sendMessage(PAGE_STAY_TIME_KEY, { url: window.location.href, duration: this.endTime - this.startTime });
     });
   }
   setStartTime(timestamp: number) {
@@ -51,7 +51,7 @@ class PageMetric extends User {
     const matched = window.location.href.match(/entryUrl=([^&]+)/i);
     if (matched && matched[1]) {
       const entryUrl = matched[1];
-      communication.sendMessage(ENTRY_KEY, { url: window.location.href, entryUrl });
+      communication.sendMessage(ENTRY_KEY, { entryUrl });
     }
   }
 
@@ -86,7 +86,10 @@ class PageMetric extends User {
           sourceInfos.push(extract(staticSourceTiming, ["initiatorType", "duration", "name"]));
           staticSourceMap.set(staticSourceTiming.initiatorType, sourceInfos);
         });
-        communication.sendMessage(STATIC_SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
+        communication.sendMessage(STATIC_SOURCE_LOADED_KEY, {
+          url: window.location.href,
+          resource: Object.fromEntries(staticSourceMap),
+        });
       },
       { once: true }
     );
@@ -135,7 +138,7 @@ class PageMetric extends User {
         return;
       }
       const { domComplete, fetchStart } = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-      communication.sendMessage(FIRST_INTERACTIVE_KEY, domComplete - fetchStart);
+      communication.sendMessage(FIRST_INTERACTIVE_KEY, { url: window.location.href, duration: domComplete - fetchStart });
     }
     window.addEventListener("pageshow", onPageShow, { once: true });
   }
@@ -150,7 +153,7 @@ class PageMetric extends User {
       const { domContentLoadedEventEnd, fetchStart } = window.performance.getEntriesByType(
         "navigation"
       )[0] as PerformanceNavigationTiming;
-      communication.sendMessage(FIRST_PAINT_KEY, domContentLoadedEventEnd - fetchStart);
+      communication.sendMessage(FIRST_PAINT_KEY, { url: window.location.href, duration: domContentLoadedEventEnd - fetchStart });
     }
     window.addEventListener("pageshow", onPageShow, { once: true });
   }

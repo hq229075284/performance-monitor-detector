@@ -23,13 +23,17 @@ if (/(mac os x) (\d+_\d+_\d+)/i.test(navigatorInfo.userAgent)) {
 const clientInfo = { ...navigatorInfo, device, version };
 
 class Communication extends User {
+  appKey: string = "";
+  setAppKey(key: string) {
+    this.appKey = key;
+  }
   sendMessage(key: string, payload: any) {
-    if (window.process?.env?.NODE_ENV === "production") {
+    if (window.process?.env?.NODE_ENV === "production" && this.appKey) {
       return new Promise<void>((resolve) => {
         const img = new Image();
         img.src =
           "http://127.0.0.1:3000/message?" +
-          encodeURIComponent(JSON.stringify({ key, clientInfo, payload, userInfo: this.userInfo, url: window.location.href }));
+          encodeURIComponent(JSON.stringify({ key, appKey: this.appKey, clientInfo, payload, userInfo: this.userInfo }));
         img.onload = function () {
           console.log("monitor data send success");
           resolve();

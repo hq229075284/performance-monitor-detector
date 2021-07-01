@@ -65,7 +65,7 @@ function getTemplateHtml({ attributes, files, title, meta }) {
     })
     .join("\n");
 
-  const testScripts = ["pre.js", "ajax.js", "static_source.js"];
+  const testScripts = ["pre.js", 'uv.js', "ajax.js", "static_source.js"];
 
   return `
 <!DOCTYPE html>
