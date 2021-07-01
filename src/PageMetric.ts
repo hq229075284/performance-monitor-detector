@@ -64,13 +64,21 @@ class PageMetric extends User {
           console.log("不支持`getEntriesByType`api");
           return;
         }
-        const staticSourceList = window.performance.getEntriesByType("source") as PerformanceResourceTiming[];
+        const staticSourceList = window.performance.getEntriesByType("resource") as PerformanceResourceTiming[];
         type keyEnum = "initiatorType" | "duration" | "name";
         const staticSourceMap = new Map<
           string,
           Pick<PerformanceResourceTiming, keyEnum>[] /* ReturnType中不能给泛型指定参数类型的值，所以直接定义最终要存储的值的类型 */
         >();
         staticSourceList.forEach((staticSourceTiming) => {
+          const ignoreResourceTypes = ["xmlhttprequest"];
+          const ignoreResourceNameReg = /^https?:\/\/127.0.0.1:3000/;
+          if (ignoreResourceTypes.includes(staticSourceTiming.initiatorType)) {
+            return;
+          }
+          if (ignoreResourceNameReg.test(staticSourceTiming.name)) {
+            return;
+          }
           if (!staticSourceMap.has(staticSourceTiming.initiatorType)) {
             staticSourceMap.set(staticSourceTiming.initiatorType, []);
           }
@@ -78,7 +86,6 @@ class PageMetric extends User {
           sourceInfos.push(extract(staticSourceTiming, ["initiatorType", "duration", "name"]));
           staticSourceMap.set(staticSourceTiming.initiatorType, sourceInfos);
         });
-
         communication.sendMessage(STATIC_SOURCE_LOADED_KEY, Object.fromEntries(staticSourceMap));
       },
       { once: true }

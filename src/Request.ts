@@ -17,22 +17,28 @@ class NewXHR extends XMLHttpRequest {
   }
   send(body: Parameters<XMLHttpRequest["send"]>[0]) {
     super.send(body);
-    const url = this.responseURL;
     body = body instanceof Blob ? "blob" : body;
     const now = Date.now();
     const record: IRecord = {
-      //   id: url + "|" + JSON.stringify(body) + "|" + now,
-      url,
       body,
       startTime: now,
     } as IRecord;
 
-    const onLoad = () => {
+    const onLoad = (e: ProgressEvent) => {
+      const currentXhr = e.currentTarget as XMLHttpRequest;
+      record.url = currentXhr.responseURL;
       record.endTime = Date.now();
       record.duration = record.endTime - record.startTime;
+      if (typeof window.performance.getEntriesByName === "function") {
+        // 精确采集（仅计算接口请求时间）
+        const resource = window.performance.getEntriesByName(record.url).pop() as PerformanceResourceTiming;
+        record.startTime = resource.startTime;
+        record.endTime = resource.responseEnd;
+        record.duration = resource.duration;
+      }
       communication.sendMessage(AJAX_KEY, record);
     };
-    this.addEventListener("load", onLoad, { once: true });
+    this.addEventListener("load", onLoad);
   }
 }
 
